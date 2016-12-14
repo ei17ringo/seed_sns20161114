@@ -91,6 +91,7 @@
             <label class="col-sm-4 control-label">ニックネーム</label>
             <div class="col-sm-8">
               <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun">
+              <?php echo $error_nickname; ?>
             </div>
           </div>
           <!-- メールアドレス -->
@@ -98,6 +99,7 @@
             <label class="col-sm-4 control-label">メールアドレス</label>
             <div class="col-sm-8">
               <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com">
+              <?php echo $error_email; ?>
             </div>
           </div>
           <!-- パスワード -->
@@ -105,6 +107,7 @@
             <label class="col-sm-4 control-label">パスワード</label>
             <div class="col-sm-8">
               <input type="password" name="password" class="form-control" placeholder="">
+              <?php echo $error_password; ?>
             </div>
           </div>
           <!-- プロフィール写真 -->
