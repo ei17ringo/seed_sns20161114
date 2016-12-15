@@ -1,31 +1,49 @@
 <?php
+  //セッションを使うページに必ず入れる
+  session_start();
 
-  //check.phpにPOST送信していた部分をindex.phpに送信するように変更しましょう
-
-  //POST送信されたら、入力チェックを行いましょう
-  //入力されていない場合、「入力してください」というエラーメッセージを入力欄の下に表示しましょう
-  $error_nickname = '';
-  $error_email = '';
-  $error_password = '';
+  //エラー情報を保持する
+  $error = array();
 
   if (isset($_POST) && !empty($_POST)){
 
+    //ニックネームが未入力の場合
     if (empty($_POST['nick_name'])){
 
-      $error_nickname = 'ニックネームを入力してください';
+      //$error_nickname = 'ニックネームを入力してください';
+      $error['nick_name'] = 'blank';
     }
 
-
+    //メールアドレスが未入力の場合
     if (empty($_POST['email'])){
 
-      $error_email = 'メールアドレスを入力してください';
+      //$error_email = 'メールアドレスを入力してください';
+      $error['email'] = 'blank';
     }
 
-
+    //パスワードが未入力
     if (empty($_POST['password'])){
 
-      $error_password = 'パスワードを入力してください';
+      //$error_password = 'パスワードを入力してください';
+
+      $error['password'] = 'blank';
+    }elseif(strlen($_POST['password']) < 4){
+      //パスワードが4文字より少ない
+      $error['password'] = 'length';
     }
+
+    //エラーがない場合
+    if (empty($error)){
+
+      //セッションに値を保存
+      $_SESSION['join'] = $_POST;
+
+      // check.php へ移動
+      header('Location:check.php');
+      exit();
+    }
+
+
   }
 
 
@@ -90,24 +108,43 @@
           <div class="form-group">
             <label class="col-sm-4 control-label">ニックネーム</label>
             <div class="col-sm-8">
-              <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun">
-              <?php echo $error_nickname; ?>
+              <?php if(isset($_POST['nick_name'])){ ?>
+                <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun" value="<?php echo $_POST['nick_name']; ?>">
+              <?php }else{ ?>
+                <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun">
+              <?php } ?>
+              <?php if (isset($error['nick_name']) && $error['nick_name'] == 'blank'): ?>
+                <p class="error">* ニックネームを入力してください。</p>
+              <?php endif; ?>
+
             </div>
           </div>
           <!-- メールアドレス -->
           <div class="form-group">
             <label class="col-sm-4 control-label">メールアドレス</label>
             <div class="col-sm-8">
-              <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com">
-              <?php echo $error_email; ?>
+              <?php if(isset($_POST['email'])){ ?>
+                <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com" value="<?php echo $_POST['email']; ?>">
+              <?php }else{ ?>
+                <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com">
+              <?php } ?>
+              <?php if (isset($error['email']) && $error['email'] == 'blank'): ?>
+                <p class="error">* メールアドレスを入力してください。</p>
+              <?php endif; ?>
             </div>
           </div>
           <!-- パスワード -->
           <div class="form-group">
             <label class="col-sm-4 control-label">パスワード</label>
             <div class="col-sm-8">
-              <input type="password" name="password" class="form-control" placeholder="">
-              <?php echo $error_password; ?>
+              <?php if(isset($_POST['password'])){ ?>
+                <input type="password" name="password" class="form-control" placeholder=""  value="<?php echo $_POST['password']; ?>">
+              <?php }else{ ?>
+                <input type="password" name="password" class="form-control" placeholder="">
+              <?php } ?>
+              <?php if (isset($error['password']) && $error['password'] == 'blank'): ?>
+                <p class="error">* パスワードを入力してください。</p>
+              <?php endif; ?>
             </div>
           </div>
           <!-- プロフィール写真 -->
