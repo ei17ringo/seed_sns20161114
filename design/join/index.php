@@ -2,6 +2,9 @@
   //セッションを使うページに必ず入れる
   session_start();
 
+  // dbconnect.phpを読み込む
+  require('../dbconnect.php');
+
   //タイムゾーンのエラーが出た人用
   date_default_timezone_set('Asia/Manila');
 
@@ -41,6 +44,21 @@
        $ext = substr($fileName, -3);
        if ($ext != 'jpg' && $ext != 'gif' && $ext != 'png') {
          $error['picture_path'] = 'type';
+       }
+     }
+
+     //重複アカウント(メールアドレス)のチェック
+      if (empty($error)) {
+       $sql = sprintf('SELECT COUNT(*) AS cnt FROM `members` WHERE `email` = "%s"',
+         mysqli_real_escape_string($db, $email)
+       );
+       // SQL実行
+       $record = mysqli_query($db, $sql) or die(mysqli_error($db));
+       // 連想配列としてSQL実行結果を受け取る
+       $table = mysqli_fetch_assoc($record);
+       if ($table['cnt'] > 0) {
+         // 同じメールアドレスが１件以上あったらエラー
+         $error['email'] = 'duplicate';
        }
      }
 
@@ -153,6 +171,9 @@
               <?php } ?>
               <?php if (isset($error['email']) && $error['email'] == 'blank'): ?>
                 <p class="error">* メールアドレスを入力してください。</p>
+              <?php endif; ?>
+              <?php if (isset($error['email']) && $error['email'] == 'duplicate'): ?>
+                <p class="error">* 指定したメールアドレスはすでに登録されています。</p>
               <?php endif; ?>
             </div>
           </div>
