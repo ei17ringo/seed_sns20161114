@@ -1,3 +1,60 @@
+<?
+session_start();
+
+// 自動ログイン処理
+if (isset($_COOKIE['email']) && $_COOKIE['email'] != '') {
+ $_POST['email'] = $_COOKIE['email'];
+ $_POST['password'] = $_COOKIE['password'];
+ $_POST['save'] = 'on';
+}
+
+require('dbconnect.php');
+
+$email = '';
+$password = '';
+
+//ログインボタンが押されたとき(POST)
+if (!empty($_POST)){
+	if ($_POST['email'] != '' && $_POST['password'] != '') {
+		//認証処理
+
+		//今入力されたemailとパスワードの組み合わせでデータが取得できるか確認するSQL
+		$sql = sprintf('SELECT * FROM `members` WHERE `email` = "%s" AND `password` = "%s"',
+         mysqli_real_escape_string($db, $_POST['email']),
+         mysqli_real_escape_string($db, sha1($_POST['password']))
+       );
+       // SQL実行
+       $record = mysqli_query($db, $sql) or die(mysqli_error($db));
+
+       //$table = false (データが何も取得できなかった場合、elseに飛ぶ)
+       if ($table = mysqli_fetch_assoc($record)) {
+       		//ログイン成功
+          $_SESSION['id'] = $table['member_id'];
+ 	      $_SESSION['time'] = time();
+
+ 	      //自動ログインのチェックボックスにチェックが入っていたらCookieに入力情報を保存
+ 	      if ($_POST['save'] == 'on') {
+          	setcookie('email', $_POST['email'], time() + 60*60*24*14);
+          	setcookie('password', $_POST['password'], time() + 60*60*24*14);
+         　}
+
+   		  header('Location: index.php');
+          exit();
+
+       }else{
+       		//ログイン失敗
+       		$error['login'] = 'failed';
+       }
+
+	}else{
+		//必須エラー
+		$error['login'] = 'blank';
+		$email = htmlspecialchars($_POST['email']);
+		$password = htmlspecialchars($_POST['password']);
+	}
+}
+
+?>
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -54,17 +111,35 @@
           <div class="form-group">
             <label class="col-sm-4 control-label">メールアドレス</label>
             <div class="col-sm-8">
-              <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com">
+              <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com" value="<?php echo $email; ?>">
+            	<!-- 必須エラー -->
+	          <?php if(isset($error['login']) && $error['login'] == 'blank'){ ?>
+	               <p class="error">* メールアドレスとパスワードをご記入ください。</p>
+	          <?php } ?>
+	          	<!-- ログインエラー -->
+	          <?php if(isset($error['login']) && $error['login'] == 'failed'){ ?>
+	               <p class="error">* ログインに失敗しました。正しくご記入ください。</p>
+	          <?php } ?>
+	          
             </div>
           </div>
           <!-- パスワード -->
           <div class="form-group">
             <label class="col-sm-4 control-label">パスワード</label>
             <div class="col-sm-8">
-              <input type="password" name="password" class="form-control" placeholder="">
+              <input type="password" name="password" class="form-control" placeholder="" value="<?php echo $password; ?>">
             </div>
           </div>
-          <input type="submit" class="btn btn-default" value="ログイン">
+          <!-- 自動ログインのチェックボックス -->
+          <div class="form-group">
+             <label class="col-sm-4 control-label">自動ログイン</label>
+             <div class="col-sm-8">
+               <input type="checkbox" id="save" name="save" value="on">
+             </div>
+          </div>
+
+          
+          <input type="submit" class="btn btn-default" value="ログイン"> | <a href="join/" class="btn btn-default">会員登録</a>
         </form>
       </div>
     </div>
