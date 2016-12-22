@@ -1,3 +1,55 @@
+<?php
+
+session_start();
+ 
+   require('dbconnect.php');
+ 
+   // ログイン中の条件
+   // １．セッションにidが入っていること
+   // ２．最後の行動から１時間以内であること
+   if (isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time()) {
+     // ログインしている
+     // セッションの時間を更新
+     $_SESSION['time'] = time();
+ 
+     // SQLを実行し、ユーザのデータを取得
+     $sql = sprintf('SELECT * FROM `members` WHERE `member_id` = %d',
+       mysqli_real_escape_string($db, $_SESSION['id'])
+     );
+ 
+     $record = mysqli_query($db, $sql) or die(mysqli_error($db));
+     $member = mysqli_fetch_assoc($record);
+ 
+   } else {
+     // ログインしていない
+     header('Location: login.php');
+   }
+
+   //投稿を記録する（つぶやくボタンをクリックしたとき）
+   if (!empty($_POST)) {
+    if ($_POST['tweet'] != '') {
+      //INSERT文作成
+      $sql = sprintf('INSERT INTO `tweets` SET `tweet` = "%s", `member_id` = %d, `reply_tweet_id` = 0, `created` = now()',
+         mysqli_real_escape_string($db, $_POST['tweet']),
+         mysqli_real_escape_string($db, $member['member_id'])
+       );
+
+      //INSERT文実行
+      mysqli_query($db, $sql) or die(mysqli_error($db));
+
+      // SQL実行後、画面を再度表示
+      header('Location: index.php');
+      exit();
+
+    }
+   }
+
+   //投稿を取得する
+   $sql = 'SELECT m.`nick_name`, m.`picture_path`, t.* FROM `tweets` t, `members` m WHERE m.member_id = t.member_id ORDER BY t.`created` DESC';
+   $tweets = mysqli_query($db, $sql) or die(mysqli_error($db));
+ 
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -33,12 +85,12 @@
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="index.html"><span class="strong-title"><i class="fa fa-twitter-square"></i> Seed SNS</span></a>
+              <a class="navbar-brand" href="index.php"><span class="strong-title"><i class="fa fa-twitter-square"></i> Seed SNS</span></a>
           </div>
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <ul class="nav navbar-nav navbar-right">
-                <li><a href="logout.html">ログアウト</a></li>
+                <li><a href="logout.php">ログアウト</a></li>
               </ul>
           </div>
           <!-- /.navbar-collapse -->
@@ -49,7 +101,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4 content-margin-top">
-        <legend>ようこそ●●さん！</legend>
+        <legend>ようこそ<?php echo htmlspecialchars($member['nick_name'], ENT_QUOTES, 'UTF-8'); ?>さん！</legend>
         <form method="post" action="" class="form-horizontal" role="form">
             <!-- つぶやき -->
             <div class="form-group">

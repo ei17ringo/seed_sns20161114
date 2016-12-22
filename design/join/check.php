@@ -9,6 +9,7 @@
       exit();
    }
 
+// var_dump("test");
    // DB登録処理(データがPOST送信されたら)
    if (!empty($_POST)) {
       //SQL文を作成
