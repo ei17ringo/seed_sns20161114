@@ -247,8 +247,8 @@ session_start();
             <a href="view.php?tweet_id=<?php echo $tweet['tweet_id']; ?>">
               <?php echo htmlspecialchars($tweet['created'], ENT_QUOTES, 'UTF-8'); ?>
             </a>
-            [<a href="#" style="color: #00994C;">編集</a>]
             <?php if ($_SESSION['id'] == $tweet['member_id']): ?>
+            [<a href="edit.php?tweet_id=<?php echo $tweet['tweet_id']; ?>" style="color: #00994C;">編集</a>]
             [<a href="delete.php?tweet_id=<?php echo $tweet['tweet_id']; ?>" style="color: #F33;">削除</a>]
             <?php endif; ?>
           </p>
