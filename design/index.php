@@ -37,8 +37,8 @@ session_start();
       //INSERT文作成
       $sql = sprintf('INSERT INTO `tweets` SET `tweet` = "%s", `member_id` = %d, `reply_tweet_id` = %d, `created` = now()',
          mysqli_real_escape_string($db, $_POST['tweet']),
-         mysqli_real_escape_string($db, $member['member_id'],
-         $reply_tweet_id)
+         mysqli_real_escape_string($db, $member['member_id']),
+         $reply_tweet_id
        );
 
       //INSERT文実行
