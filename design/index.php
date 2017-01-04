@@ -109,6 +109,11 @@ session_start();
     );
    $tweets = mysqli_query($db, $sql) or die(mysqli_error($db));
 
+
+  // 本文内のURLにリンクを設定します
+  function makeLink($value) {
+    return mb_ereg_replace("(https?)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)", '<a href="\1\2">\1\2</a>' , $value);
+  }
 ?>
 
 <!DOCTYPE html>
@@ -205,7 +210,7 @@ session_start();
         <div class="msg">
           <img src="member_picture/<?php echo htmlspecialchars($tweet['picture_path'], ENT_QUOTES, 'UTF-8'); ?>" width="48" height="48">
           <p>
-            <?php echo htmlspecialchars($tweet['tweet'], ENT_QUOTES, 'UTF-8'); ?><span class="name"> (<?php echo htmlspecialchars($tweet['nick_name'], ENT_QUOTES, 'UTF-8'); ?>) </span>
+            <?php echo makeLink(htmlspecialchars($tweet['tweet'], ENT_QUOTES, 'UTF-8')); ?><span class="name"> (<?php echo htmlspecialchars($tweet['nick_name'], ENT_QUOTES, 'UTF-8'); ?>) </span>
             [<a href="index.php?res=<?php echo htmlspecialchars($tweet['tweet_id'], ENT_QUOTES, 'UTF-8'); ?>">Re</a>]
           </p>
           <p class="day">
