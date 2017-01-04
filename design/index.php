@@ -51,9 +51,6 @@ session_start();
     }
    }
 
-   //投稿を取得する
-   $sql = 'SELECT m.`nick_name`, m.`picture_path`, t.* FROM `tweets` t, `members` m WHERE m.member_id = t.member_id ORDER BY t.`created` DESC';
-   $tweets = mysqli_query($db, $sql) or die(mysqli_error($db));
 
 
    //返信の場合
@@ -71,7 +68,47 @@ session_start();
       //初期表示メッセージ作成
       $tweet = '@'. $table['nick_name'].' '.$table['tweet'];
     }
+
+    //ページング処理
+    $page = '';
+
+    // GETパラメータで渡されるページ番号を取得
+   if (isset($_REQUEST['page'])) {
+     $page = $_REQUEST['page'];
+   }
+
+   // pageパラメータがない場合は、ページ番号を1にする
+   if ($page == '') {
+     $page = 1;
+   }
+
+   // ①表示する正しいページの数値（Min）を設定
+   $page = max($page, 1);
+   // max関数：()内に指定した複数のデータから、一番大きい値を返す
+   // page=-1と指定された場合、マイナスの値のページ番号は存在しないので、1に強制変換する
+
+   // ②必要なページ数を計算する
+   $sql = 'SELECT COUNT(*) AS cnt FROM `tweets`';
+   $recordSet = mysqli_query($db, $sql) or die(mysqli_error($db));
+   $table = mysqli_fetch_assoc($recordSet);
  
+   // ceil()関数：切り上げする関数
+   $maxPage = ceil($table['cnt'] / 5);
+
+   // ③表示する正しいページ数の数値（Max）を設定
+   $page = min($page, $maxPage);
+   // mim関数：()内に指定した複数のデータから、一番小さい値を返す
+   // page=100と指定された場合、ページ番号100のデータは存在しないので、最大ページ数に強制変換する
+
+   // ④ページに表示する件数だけ取得
+   $start = ($page - 1) * 5;
+   $start = max(0, $start);
+
+   $sql = sprintf('SELECT m.`nick_name`, m.`picture_path`, t.* FROM `tweets` t, `members` m WHERE m.member_id = t.member_id ORDER BY t.`created` DESC LIMIT %d, 5',
+    $start
+    );
+   $tweets = mysqli_query($db, $sql) or die(mysqli_error($db));
+
 ?>
 
 <!DOCTYPE html>
@@ -143,9 +180,20 @@ session_start();
           <ul class="paging">
             <input type="submit" class="btn btn-info" value="つぶやく">
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                <li><a href="index.html" class="btn btn-default">前</a></li>
+                <?php if ($page == 1){ ?>
+                <li>前</li>
+
+               <?php }else{ ?>
+                <li><a href="index.php?page=<?php echo $page -1; ?>" class="btn btn-default">前</a></li>
+
+                <?php } ?>
                 &nbsp;&nbsp;|&nbsp;&nbsp;
-                <li><a href="index.html" class="btn btn-default">次</a></li>
+                <?php if ($page == $maxPage){ ?>
+                  <li>次</li>
+
+                <?php }else{ ?>
+                <li><a href="index.php?page=<?php echo $page +1; ?>" class="btn btn-default">次</a></li>
+                <?php } ?>
           </ul>
         </form>
       </div>
