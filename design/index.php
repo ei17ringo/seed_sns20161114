@@ -198,13 +198,19 @@ session_start();
               </div>
             </div>
           <ul class="paging">
+              <?php
+               $word = '';
+               if (isset($_GET['search_word'])) {
+                 $word = '&search_word=' . $_GET['search_word'];
+               }
+             ?>
             <input type="submit" class="btn btn-info" value="つぶやく">
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <?php if ($page == 1){ ?>
                 <li>前</li>
 
                <?php }else{ ?>
-                <li><a href="index.php?page=<?php echo $page -1; ?>" class="btn btn-default">前</a></li>
+                <li><a href="index.php?page=<?php echo $page -1; ?><?php echo $word; ?>" class="btn btn-default">前</a></li>
 
                 <?php } ?>
                 &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -212,7 +218,7 @@ session_start();
                   <li>次</li>
 
                 <?php }else{ ?>
-                <li><a href="index.php?page=<?php echo $page +1; ?>" class="btn btn-default">次</a></li>
+                <li><a href="index.php?page=<?php echo $page +1; ?><?php echo $word; ?>" class="btn btn-default">次</a></li>
                 <?php } ?>
           </ul>
         </form>
