@@ -165,7 +165,9 @@ session_start();
               <?php echo htmlspecialchars($tweet['created'], ENT_QUOTES, 'UTF-8'); ?>
             </a>
             [<a href="#" style="color: #00994C;">編集</a>]
-            [<a href="#" style="color: #F33;">削除</a>]
+            <?php if ($_SESSION['id'] == $tweet['member_id']): ?>
+            [<a href="delete.php?tweet_id=<?php echo $tweet['tweet_id']; ?>" style="color: #F33;">削除</a>]
+            <?php endif; ?>
           </p>
         </div>
         <?php endwhile; ?>
